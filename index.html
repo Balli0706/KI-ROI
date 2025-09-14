@@ -1,0 +1,1018 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KI ROI-Rechner - Futuristic Edition</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap');
+        
+        :root {
+            --bg-dark: #0a0a0f;
+            --bg-card: #1a1a2e;
+            --bg-gradient: linear-gradient(135deg, #16213e 0%, #0f3460 50%, #533a71 100%);
+            --accent-blue: #00d4ff;
+            --accent-purple: #6c5ce7;
+            --accent-cyan: #00cec9;
+            --text-primary: #ffffff;
+            --text-secondary: #a0a0a0;
+            --text-muted: #666666;
+            --success-green: #00b894;
+            --warning-orange: #e17055;
+            --border-color: #2d3748;
+            --shadow-glow: 0 0 20px rgba(0, 212, 255, 0.3);
+            --shadow-card: 0 8px 32px rgba(0, 0, 0, 0.6);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-primary);
+            line-height: 1.6;
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+        
+        /* Animated Background */
+        .animated-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background: var(--bg-dark);
+            overflow: hidden;
+        }
+        
+        .bg-gradient {
+            position: absolute;
+            width: 200%;
+            height: 200%;
+            background: var(--bg-gradient);
+            animation: gradientShift 20s ease infinite;
+            opacity: 0.7;
+        }
+        
+        @keyframes gradientShift {
+            0%, 100% { transform: translate(-50%, -50%) rotate(0deg); }
+            25% { transform: translate(-40%, -60%) rotate(90deg); }
+            50% { transform: translate(-60%, -40%) rotate(180deg); }
+            75% { transform: translate(-50%, -50%) rotate(270deg); }
+        }
+        
+        .particles {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+        
+        .particle {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: var(--accent-blue);
+            border-radius: 50%;
+            animation: particleFloat 15s infinite linear;
+            opacity: 0.6;
+        }
+        
+        @keyframes particleFloat {
+            0% {
+                transform: translateY(100vh) scale(0);
+                opacity: 0;
+            }
+            10% {
+                opacity: 0.6;
+                transform: scale(1);
+            }
+            90% {
+                opacity: 0.6;
+            }
+            100% {
+                transform: translateY(-100vh) scale(0);
+                opacity: 0;
+            }
+        }
+        
+        .grid-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(rgba(0, 212, 255, 0.1) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 212, 255, 0.1) 1px, transparent 1px);
+            background-size: 50px 50px;
+            animation: gridMove 30s linear infinite;
+        }
+        
+        @keyframes gridMove {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(50px, 50px); }
+        }
+        
+        /* Header */
+        .header {
+            text-align: center;
+            padding: 3rem 2rem;
+            position: relative;
+            z-index: 10;
+        }
+        
+        .title {
+            font-size: clamp(2.5rem, 6vw, 4rem);
+            font-weight: 900;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 0 30px rgba(0, 212, 255, 0.5);
+            letter-spacing: -2px;
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+            margin-bottom: 2rem;
+            font-weight: 300;
+        }
+        
+        .version-badge {
+            display: inline-block;
+            background: rgba(0, 212, 255, 0.2);
+            color: var(--accent-blue);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            border: 1px solid var(--accent-blue);
+            backdrop-filter: blur(10px);
+        }
+        
+        /* Main Container */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            position: relative;
+            z-index: 10;
+        }
+        
+        .calculator-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 3rem;
+            margin-bottom: 3rem;
+        }
+        
+        /* Cards */
+        .card {
+            background: rgba(26, 26, 46, 0.8);
+            border-radius: 20px;
+            padding: 2rem;
+            border: 1px solid var(--border-color);
+            backdrop-filter: blur(20px);
+            box-shadow: var(--shadow-card);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--accent-blue), transparent);
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-card), var(--shadow-glow);
+            border-color: var(--accent-blue);
+        }
+        
+        .card-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .card-icon {
+            width: 24px;
+            height: 24px;
+            background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+        }
+        
+        /* Form Elements */
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            background: rgba(0, 0, 0, 0.3);
+            color: var(--text-primary);
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: var(--accent-blue);
+            box-shadow: 0 0 20px rgba(0, 212, 255, 0.3);
+            background: rgba(0, 0, 0, 0.5);
+        }
+        
+        .form-input::placeholder {
+            color: var(--text-muted);
+        }
+        
+        .input-suffix {
+            position: relative;
+        }
+        
+        .input-suffix::after {
+            content: attr(data-suffix);
+            position: absolute;
+            right: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            pointer-events: none;
+        }
+        
+        /* Results */
+        .results-card {
+            background: rgba(26, 26, 46, 0.9);
+            border: 1px solid var(--accent-blue);
+            box-shadow: var(--shadow-glow);
+        }
+        
+        .metric {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .metric:last-child {
+            border-bottom: none;
+        }
+        
+        .metric-label {
+            font-weight: 500;
+            color: var(--text-secondary);
+        }
+        
+        .metric-value {
+            font-size: 1.2rem;
+            font-weight: 700;
+            font-family: 'JetBrains Mono', monospace;
+        }
+        
+        .metric-value.positive {
+            color: var(--success-green);
+        }
+        
+        .metric-value.negative {
+            color: var(--warning-orange);
+        }
+        
+        .metric-value.neutral {
+            color: var(--text-primary);
+        }
+        
+        .metric-value.ai-cost {
+            color: var(--accent-blue);
+        }
+        
+        .roi-highlight {
+            background: linear-gradient(135deg, var(--success-green), var(--accent-cyan));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-size: 2rem;
+            text-shadow: 0 0 20px rgba(0, 184, 148, 0.5);
+        }
+        
+        /* Progress Bars */
+        .progress-container {
+            margin: 1.5rem 0;
+        }
+        
+        .progress-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+        
+        .progress-bar {
+            height: 8px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 4px;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent-blue), var(--accent-purple));
+            border-radius: 4px;
+            transition: width 1s ease;
+            position: relative;
+        }
+        
+        .progress-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+            animation: shimmer 2s infinite;
+        }
+        
+        @keyframes shimmer {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+        
+        /* Charts */
+        .chart-container {
+            margin: 2rem 0;
+            height: 200px;
+            display: flex;
+            align-items: end;
+            justify-content: space-around;
+            padding: 1rem;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+            border: 1px solid var(--border-color);
+        }
+        
+        .chart-bar {
+            width: 40px;
+            background: linear-gradient(180deg, var(--accent-blue), var(--accent-purple));
+            border-radius: 4px 4px 0 0;
+            position: relative;
+            transition: height 1s ease;
+            min-height: 10px;
+        }
+        
+        .chart-bar::after {
+            content: attr(data-value);
+            position: absolute;
+            top: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: var(--text-secondary);
+            font-size: 0.8rem;
+            font-family: 'JetBrains Mono', monospace;
+        }
+        
+        .chart-labels {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 1rem;
+        }
+        
+        .chart-label {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            text-align: center;
+        }
+        
+        /* Detailed Breakdown */
+        .breakdown-section {
+            margin-top: 3rem;
+        }
+        
+        .breakdown-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+        
+        .breakdown-item {
+            background: rgba(26, 26, 46, 0.6);
+            padding: 1.5rem;
+            border-radius: 15px;
+            border: 1px solid var(--border-color);
+            backdrop-filter: blur(10px);
+        }
+        
+        .breakdown-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: var(--accent-blue);
+        }
+        
+        .breakdown-detail {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+        }
+        
+        .breakdown-detail:last-child {
+            font-weight: 600;
+            padding-top: 0.5rem;
+            border-top: 1px solid var(--border-color);
+        }
+        
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 3rem 2rem;
+            color: var(--text-muted);
+            border-top: 1px solid var(--border-color);
+            margin-top: 4rem;
+        }
+        
+        .footer a {
+            color: var(--accent-blue);
+            text-decoration: none;
+        }
+        
+        .footer a:hover {
+            text-decoration: underline;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .calculator-grid {
+                grid-template-columns: 1fr;
+                gap: 2rem;
+            }
+            
+            .header {
+                padding: 2rem 1rem;
+            }
+            
+            .container {
+                padding: 0 1rem;
+            }
+            
+            .card {
+                padding: 1.5rem;
+            }
+            
+            .breakdown-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        /* Animation Classes */
+        .fade-in {
+            animation: fadeIn 0.6s ease forwards;
+        }
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { box-shadow: var(--shadow-card); }
+            50% { box-shadow: var(--shadow-card), var(--shadow-glow); }
+            100% { box-shadow: var(--shadow-card); }
+        }
+        
+        /* Loading States */
+        .calculating {
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .calculating::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(0, 212, 255, 0.2), transparent);
+            animation: loading 1.5s infinite;
+        }
+        
+        @keyframes loading {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Animated Background -->
+    <div class="animated-bg">
+        <div class="bg-gradient"></div>
+        <div class="particles"></div>
+        <div class="grid-overlay"></div>
+    </div>
+
+    <!-- Header -->
+    <header class="header">
+        <h1 class="title">KI ROI-Rechner</h1>
+        <p class="subtitle">Berechnen Sie den Return on Investment für Ihre KI-Implementierung</p>
+        <span class="version-badge">v2.0 Futuristic Edition</span>
+    </header>
+
+    <!-- Main Content -->
+    <div class="container">
+        <div class="calculator-grid">
+            <!-- Input Card -->
+            <div class="card fade-in">
+                <h2 class="card-title">
+                    <span class="card-icon">📊</span>
+                    Parameter eingeben
+                </h2>
+                
+                <div class="form-group">
+                    <label class="form-label">Anzahl Mitarbeiter</label>
+                    <input type="number" class="form-input" id="employees" placeholder="z.B. 50" value="50" min="1">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Durchschnittliches Jahresgehalt</label>
+                    <div class="input-suffix" data-suffix="€">
+                        <input type="number" class="form-input" id="salary" placeholder="z.B. 60000" value="60000" min="0">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Zeitersparnis durch KI pro Mitarbeiter</label>
+                    <div class="input-suffix" data-suffix="Stunden/Woche">
+                        <input type="number" class="form-input" id="timeSaved" placeholder="z.B. 5" value="5" min="0" max="40">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Einmalige Implementierungskosten</label>
+                    <div class="input-suffix" data-suffix="€">
+                        <input type="number" class="form-input" id="implementationCosts" placeholder="z.B. 50000" value="50000" min="0">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Monatliche KI-Tool Kosten</label>
+                    <div class="input-suffix" data-suffix="€/Monat">
+                        <input type="number" class="form-input" id="monthlyCosts" placeholder="z.B. 2000" value="2000" min="0">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Betrachtungszeitraum</label>
+                    <div class="input-suffix" data-suffix="Jahre">
+                        <input type="number" class="form-input" id="years" placeholder="z.B. 3" value="3" min="1" max="10">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Results Card -->
+            <div class="card results-card fade-in" id="resultsCard">
+                <h2 class="card-title">
+                    <span class="card-icon">🎯</span>
+                    ROI-Ergebnisse
+                </h2>
+                
+                <div class="metric">
+                    <span class="metric-label">ROI</span>
+                    <span class="metric-value roi-highlight" id="roiValue">0%</span>
+                </div>
+                
+                <div class="metric">
+                    <span class="metric-label">Gesamtersparnis</span>
+                    <span class="metric-value positive" id="totalSavings">0 €</span>
+                </div>
+                
+                <div class="metric">
+                    <span class="metric-label">Einmalige Kosten</span>
+                    <span class="metric-value neutral" id="oneTimeCosts">0 €</span>
+                </div>
+                
+                <div class="metric">
+                    <span class="metric-label">Gesamte KI-Kosten</span>
+                    <span class="metric-value ai-cost" id="totalCosts">0 €</span>
+                </div>
+                
+                <div class="metric">
+                    <span class="metric-label">Nettogewinn</span>
+                    <span class="metric-value" id="netProfit">0 €</span>
+                </div>
+                
+                <div class="metric">
+                    <span class="metric-label">Break-Even</span>
+                    <span class="metric-value neutral" id="breakEven">0 Monate</span>
+                </div>
+                
+                <div class="progress-container">
+                    <div class="progress-label">
+                        <span>Amortisation</span>
+                        <span id="amortizationProgress">0%</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressFill" style="width: 0%;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ROI Chart -->
+        <div class="card fade-in">
+            <h2 class="card-title">
+                <span class="card-icon">📈</span>
+                ROI Entwicklung über Zeit
+            </h2>
+            <div class="chart-container" id="roiChart">
+                <!-- Chart bars will be generated by JavaScript -->
+            </div>
+            <div class="chart-labels" id="chartLabels">
+                <!-- Labels will be generated by JavaScript -->
+            </div>
+        </div>
+
+        <!-- Detailed Breakdown -->
+        <div class="breakdown-section">
+            <div class="card fade-in">
+                <h2 class="card-title">
+                    <span class="card-icon">🔍</span>
+                    Detaillierte Kostenanalyse
+                </h2>
+                
+                <div class="breakdown-grid" id="breakdownGrid">
+                    <!-- Breakdown items will be generated by JavaScript -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <p>&copy; 2024 KI ROI-Rechner | <a href="https://github.com/Balli0706/KI-ROI" target="_blank">GitHub Repository</a> | Made with 💙 for the AI Revolution</p>
+    </footer>
+
+    <script>
+        // Global variables
+        let calculationTimeout;
+        
+        // Initialize particles
+        function createParticles() {
+            const particlesContainer = document.querySelector('.particles');
+            const particleCount = 50;
+            
+            for (let i = 0; i < particleCount; i++) {
+                createParticle(particlesContainer);
+            }
+        }
+        
+        function createParticle(container) {
+            const particle = document.createElement('div');
+            particle.className = 'particle';
+            particle.style.left = Math.random() * 100 + '%';
+            particle.style.animationDelay = Math.random() * 15 + 's';
+            particle.style.animationDuration = (15 + Math.random() * 10) + 's';
+            
+            // Random colors
+            const colors = ['#00d4ff', '#6c5ce7', '#00cec9'];
+            particle.style.background = colors[Math.floor(Math.random() * colors.length)];
+            
+            container.appendChild(particle);
+            
+            // Remove and recreate particle after animation
+            setTimeout(() => {
+                if (container.contains(particle)) {
+                    container.removeChild(particle);
+                    createParticle(container);
+                }
+            }, 25000);
+        }
+        
+        // Main calculation function
+        function calculateROI() {
+            const employees = parseFloat(document.getElementById('employees').value) || 0;
+            const salary = parseFloat(document.getElementById('salary').value) || 0;
+            const timeSaved = parseFloat(document.getElementById('timeSaved').value) || 0;
+            const implementationCosts = parseFloat(document.getElementById('implementationCosts').value) || 0;
+            const monthlyCosts = parseFloat(document.getElementById('monthlyCosts').value) || 0;
+            const years = parseFloat(document.getElementById('years').value) || 1;
+            
+            // Show loading state
+            const resultsCard = document.getElementById('resultsCard');
+            resultsCard.classList.add('calculating');
+            
+            setTimeout(() => {
+                // Calculations
+                const workingWeeksPerYear = 50;
+                const workingHoursPerWeek = 40;
+                const hourlyRate = salary / (workingWeeksPerYear * workingHoursPerWeek);
+                
+                const annualTimeSavings = employees * timeSaved * workingWeeksPerYear;
+                const annualMoneySavings = annualTimeSavings * hourlyRate;
+                const totalSavingsOverPeriod = annualMoneySavings * years;
+                
+                const totalMonthlyCosts = monthlyCosts * 12 * years;
+                const totalAICosts = implementationCosts + totalMonthlyCosts;
+                
+                const netProfit = totalSavingsOverPeriod - totalAICosts;
+                const roi = totalAICosts > 0 ? ((netProfit / totalAICosts) * 100) : 0;
+                
+                // Break-even calculation
+                const monthlyMoneySavings = annualMoneySavings / 12;
+                const breakEvenMonths = monthlyMoneySavings > monthlyCosts ? 
+                    Math.ceil(implementationCosts / (monthlyMoneySavings - monthlyCosts)) : Infinity;
+                
+                // Update UI
+                updateResults({
+                    roi,
+                    totalSavings: totalSavingsOverPeriod,
+                    oneTimeCosts: implementationCosts,
+                    totalCosts: totalAICosts,
+                    netProfit,
+                    breakEven: breakEvenMonths,
+                    years,
+                    annualMoneySavings
+                });
+                
+                // Remove loading state
+                resultsCard.classList.remove('calculating');
+            }, 800);
+        }
+        
+        function updateResults(data) {
+            const {
+                roi,
+                totalSavings,
+                oneTimeCosts,
+                totalCosts,
+                netProfit,
+                breakEven,
+                years,
+                annualMoneySavings
+            } = data;
+            
+            // Update metric values
+            document.getElementById('roiValue').textContent = roi.toFixed(1) + '%';
+            document.getElementById('totalSavings').textContent = formatCurrency(totalSavings);
+            document.getElementById('oneTimeCosts').textContent = formatCurrency(oneTimeCosts);
+            document.getElementById('totalCosts').textContent = formatCurrency(totalCosts);
+            document.getElementById('netProfit').textContent = formatCurrency(netProfit);
+            document.getElementById('breakEven').textContent = breakEven === Infinity ? '∞' : breakEven + ' Monate';
+            
+            // Update colors based on values
+            const netProfitElement = document.getElementById('netProfit');
+            netProfitElement.className = 'metric-value ' + (netProfit >= 0 ? 'positive' : 'negative');
+            
+            // Update progress bar
+            const progressPercent = Math.min(100, Math.max(0, (roi + 100) / 3)); // Scale for visualization
+            document.getElementById('progressFill').style.width = progressPercent + '%';
+            document.getElementById('amortizationProgress').textContent = Math.round(progressPercent) + '%';
+            
+            // Update ROI chart
+            updateChart(years, annualMoneySavings, totalCosts);
+            
+            // Update detailed breakdown
+            updateBreakdown(data);
+            
+            // Add pulse effect for positive ROI
+            const resultsCard = document.getElementById('resultsCard');
+            if (roi > 0) {
+                resultsCard.classList.add('pulse');
+                setTimeout(() => resultsCard.classList.remove('pulse'), 2000);
+            }
+        }
+        
+        function updateChart(years, annualMoneySavings, totalCosts) {
+            const chartContainer = document.getElementById('roiChart');
+            const chartLabels = document.getElementById('chartLabels');
+            
+            chartContainer.innerHTML = '';
+            chartLabels.innerHTML = '';
+            
+            const maxValue = Math.max(annualMoneySavings, totalCosts / years) * 1.2;
+            
+            for (let year = 1; year <= Math.min(years, 5); year++) {
+                // Savings bar
+                const savingsBar = document.createElement('div');
+                savingsBar.className = 'chart-bar';
+                savingsBar.style.height = (annualMoneySavings / maxValue * 160) + 'px';
+                savingsBar.setAttribute('data-value', formatCurrencyShort(annualMoneySavings));
+                chartContainer.appendChild(savingsBar);
+                
+                // Costs bar
+                const costsBar = document.createElement('div');
+                costsBar.className = 'chart-bar';
+                costsBar.style.background = 'linear-gradient(180deg, var(--accent-blue), var(--accent-cyan))';
+                costsBar.style.height = (totalCosts / years / maxValue * 160) + 'px';
+                costsBar.setAttribute('data-value', formatCurrencyShort(totalCosts / years));
+                chartContainer.appendChild(costsBar);
+                
+                // Labels
+                const labelContainer = document.createElement('div');
+                labelContainer.className = 'chart-label';
+                labelContainer.innerHTML = `Jahr ${year}<br><small>Ersparnis | Kosten</small>`;
+                chartLabels.appendChild(labelContainer);
+            }
+        }
+        
+        function updateBreakdown(data) {
+            const breakdownGrid = document.getElementById('breakdownGrid');
+            const {
+                totalSavings,
+                oneTimeCosts,
+                totalCosts,
+                netProfit,
+                years
+            } = data;
+            
+            const monthlyCosts = parseFloat(document.getElementById('monthlyCosts').value) || 0;
+            const employees = parseFloat(document.getElementById('employees').value) || 0;
+            const timeSaved = parseFloat(document.getElementById('timeSaved').value) || 0;
+            
+            breakdownGrid.innerHTML = `
+                <div class="breakdown-item">
+                    <div class="breakdown-title">💰 Kostenpositionen</div>
+                    <div class="breakdown-detail">
+                        <span>Einmalige Implementierung</span>
+                        <span>${formatCurrency(oneTimeCosts)}</span>
+                    </div>
+                    <div class="breakdown-detail">
+                        <span>Laufende Kosten (${years} Jahre)</span>
+                        <span>${formatCurrency(monthlyCosts * 12 * years)}</span>
+                    </div>
+                    <div class="breakdown-detail">
+                        <span>Gesamtkosten</span>
+                        <span>${formatCurrency(totalCosts)}</span>
+                    </div>
+                </div>
+                
+                <div class="breakdown-item">
+                    <div class="breakdown-title">⏰ Zeitersparnis</div>
+                    <div class="breakdown-detail">
+                        <span>Stunden/Woche gesamt</span>
+                        <span>${employees * timeSaved} h</span>
+                    </div>
+                    <div class="breakdown-detail">
+                        <span>Stunden/Jahr gesamt</span>
+                        <span>${employees * timeSaved * 50} h</span>
+                    </div>
+                    <div class="breakdown-detail">
+                        <span>Über ${years} Jahre</span>
+                        <span>${employees * timeSaved * 50 * years} h</span>
+                    </div>
+                </div>
+                
+                <div class="breakdown-item">
+                    <div class="breakdown-title">📊 Finanzieller Impact</div>
+                    <div class="breakdown-detail">
+                        <span>Gesamtersparnis</span>
+                        <span>${formatCurrency(totalSavings)}</span>
+                    </div>
+                    <div class="breakdown-detail">
+                        <span>Abzgl. Gesamtkosten</span>
+                        <span>-${formatCurrency(totalCosts)}</span>
+                    </div>
+                    <div class="breakdown-detail">
+                        <span>Nettogewinn</span>
+                        <span style="color: ${netProfit >= 0 ? 'var(--success-green)' : 'var(--warning-orange)'}">${formatCurrency(netProfit)}</span>
+                    </div>
+                </div>
+            `;
+        }
+        
+        // Utility functions
+        function formatCurrency(amount) {
+            return new Intl.NumberFormat('de-DE', {
+                style: 'currency',
+                currency: 'EUR',
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0
+            }).format(amount);
+        }
+        
+        function formatCurrencyShort(amount) {
+            if (amount >= 1000000) {
+                return (amount / 1000000).toFixed(1) + 'M€';
+            } else if (amount >= 1000) {
+                return (amount / 1000).toFixed(0) + 'k€';
+            }
+            return formatCurrency(amount);
+        }
+        
+        // Event listeners
+        function setupEventListeners() {
+            const inputs = document.querySelectorAll('.form-input');
+            inputs.forEach(input => {
+                input.addEventListener('input', debounceCalculation);
+                input.addEventListener('focus', function() {
+                    this.parentElement.style.transform = 'scale(1.02)';
+                });
+                input.addEventListener('blur', function() {
+                    this.parentElement.style.transform = 'scale(1)';
+                });
+            });
+        }
+        
+        function debounceCalculation() {
+            clearTimeout(calculationTimeout);
+            calculationTimeout = setTimeout(calculateROI, 300);
+        }
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            createParticles();
+            setupEventListeners();
+            calculateROI(); // Initial calculation
+            
+            // Animate cards on scroll
+            const observerOptions = {
+                threshold: 0.1,
+                rootMargin: '0px 0px -50px 0px'
+            };
+            
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('fade-in');
+                    }
+                });
+            }, observerOptions);
+            
+            document.querySelectorAll('.card').forEach(card => {
+                observer.observe(card);
+            });
+        });
+        
+        // Add some interactivity
+        document.addEventListener('mousemove', function(e) {
+            const cards = document.querySelectorAll('.card');
+            cards.forEach(card => {
+                const rect = card.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                
+                if (x >= 0 && x <= rect.width && y >= 0 && y <= rect.height) {
+                    const centerX = rect.width / 2;
+                    const centerY = rect.height / 2;
+                    const rotateX = (y - centerY) / 20;
+                    const rotateY = (centerX - x) / 20;
+                    
+                    card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateZ(10px)`;
+                } else {
+                    card.style.transform = '';
+                }
+            });
+        });
+    </script>
+</body>
+</html>
